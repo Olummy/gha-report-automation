@@ -1,0 +1,9 @@
+ID  Trial   FilterType  Season  Methanol    
+3   t1  typ3    Fall    18.49448938  
+17  t2  typ3    Fall    3.784879647  
+4   t1  typ3    Fall    16.65284265  
+18  t2  typ3    Fall    2.357162521  
+5   t1  typ3    Fall    11.90047584  
+19  t2  typ3    Fall    0.51898894   
+6   t1  typ2    Fall    16.90817752  
+20  t2  typ2    Fall    11.37722132

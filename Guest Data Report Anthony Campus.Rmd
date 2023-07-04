@@ -1,0 +1,361 @@
+---
+title: "Guest Data Analysis"
+author: "Guest Data Unit"
+date: "March 15th 2020"
+fontsize: 10pt
+output: 
+  beamer_presentation: 
+    colortheme: beaver
+    fig_height: 5
+    fonttheme: structuresmallcapsserif
+    includes:
+      in_header: header-Anthony.tex
+    theme: AnnArbor
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+```
+
+
+
+<!----- Library----->
+
+```{r}
+library(tidyverse)
+library(lubridate)
+library(scales)
+library(readxl)
+library(ggrepel)
+library(kableExtra)
+#library(flextable)
+#library(officer)
+options(scipen = 999)
+```
+
+
+<!----- Read Data ------->
+
+```{r}
+# guest_data <- read_excel("C:\\Users\\LONGBRIDGE\\Documents\\Working.Directory\\Harvesters\\Data Captured - Sun 30th June, 2019.xlsx",
+#                          sheet = "All Data",
+#                         col_names = TRUE) %>%
+
+ guest_data <- read_excel("Data Captured - Sun 15th Mar, 2020 - Anthony.xlsx",
+                         sheet = "All Data",
+                          col_names = TRUE) %>% 
+  mutate(Timestamp = ymd_hms(Timestamp),
+         #`Date of Birth` = ymd(`Date of Birth`), 
+         `Date of Birth` = janitor::excel_numeric_to_date(as.numeric(`Date of Birth`)),
+         Age = abs(round(time_length(interval(`Date of Birth`, Sys.Date()), "years"),0)),
+         Age_Range = if_else(Age < 20, "<20 yrs", 
+                             if_else(Age >= 20 & Age <= 25, "20-25 yrs",
+                                     if_else(Age >= 26 & Age <= 35, "26-35 yrs",
+                                             if_else(Age >= 36 & Age <= 45, "36-45 yrs", "46+")))))
+
+
+guest_only <- guest_data %>% 
+  filter(`Are you a?` != "New Convert")
+
+convert_only <- guest_data %>% 
+  filter(`Are you a?` == "New Convert")
+
+```
+
+
+## Guest analysis by Service Time
+
+```{r}
+
+# big_border = fp_border(color="blue", width = 2)
+# border_v = fp_border(color="gray")
+# border_h = fp_border(color="gray")
+# 
+ guest_only %>% 
+   group_by(`Are you a?`, Service) %>% 
+   count() %>% 
+  # ungroup() %>% 
+  # mutate(District = case_when(District == NA ~ "Unknown",
+  #                             TRUE ~ District)) %>% 
+   rename(Count = n) %>% 
+   spread(Service, Count, fill = 0) %>% 
+#   flextable() %>% 
+#   border_remove() %>% 
+#   border_outer(part="all", border = big_border ) %>% 
+#   border_inner_h(part="all", border = border_h ) %>% 
+#   border_inner_v(part="all", border = border_v ) %>%
+#   bold(part = "header") %>%
+#   autofit()
+  
+knitr::kable(., caption = "Guest count by service time and guest category", 
+             "latex", booktabs = T)%>%
+  kable_styling(full_width = F, latex_options = c("striped", "scale_down", "hold_position"))
+```
+
+## Guest analysis by District
+
+```{r}
+
+# big_border = fp_border(color="blue", width = 2)
+# border_v = fp_border(color="gray")
+# border_h = fp_border(color="gray")
+# 
+ guest_only %>% 
+   group_by(`Are you a?`, District) %>% 
+   count() %>% 
+  ungroup() %>% 
+  mutate(District = case_when(District == NA ~ "Unknown",
+                              TRUE ~ District)) %>% 
+   rename(Count = n) %>% 
+   spread(District, Count, fill = 0) %>% 
+#   flextable() %>% 
+#   border_remove() %>% 
+#   border_outer(part="all", border = big_border ) %>% 
+#   border_inner_h(part="all", border = border_h ) %>% 
+#   border_inner_v(part="all", border = border_v ) %>%
+#   bold(part = "header") %>%
+#   autofit()
+  
+knitr::kable(., caption = "Guest count by district and guest category", 
+             "latex", booktabs = T)%>%
+  kable_styling(full_width = F, latex_options = c("striped", "scale_down", "hold_position"))
+```
+
+
+
+
+
+## Guest analysis by guest category
+
+```{r}
+
+
+guest_only %>% 
+  #filter(Age_Range != "NA") %>% 
+  group_by(`Are you a?`) %>%
+  summarise(Freq = n()) %>% 
+  mutate(prop = Freq/sum(Freq)) %>% 
+  filter(Freq != 0) %>% 
+  
+  ggplot(mapping = aes(x = 2, y = prop, fill = `Are you a?`))+
+  geom_bar(width = 1, color = "white", stat = "identity") +
+  xlim(0.5, 2.5) +
+  coord_polar(theta = "y", start = 0) +
+  theme_void() +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 4, position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Reds", direction = 1) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+
+  labs(title = "Guest by category",
+       x = "",
+       y = "",
+       fill = "Guest Category") +
+  theme(legend.position = "bottom") 
+```
+
+
+## Guest analysis by gender
+
+
+```{r}
+
+
+guest_only %>% 
+  filter(Gender != "NA") %>% 
+  group_by(Gender) %>%
+  summarise(Freq = n()) %>% 
+  mutate(prop = Freq/sum(Freq)) %>% 
+  filter(Freq != 0) %>% 
+  
+  ggplot(mapping = aes(x = 2, y = prop, fill = Gender))+
+  geom_bar(width = 1, color = "white", stat = "identity", na.rm = TRUE) +
+  xlim(0.5, 2.5) +
+  coord_polar(theta = "y", start = 0) +
+  theme_void() +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 4, position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Reds", direction = 1) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+
+  labs(title = "Guest by gender category",
+       x = "",
+       y = "",
+       fill = "Gender") +
+  theme(legend.position = "bottom") 
+```
+
+## Guest by marital status
+
+```{r}
+guest_only %>% 
+  filter(`Marital Status` != "NA") %>% 
+  group_by(`Marital Status`) %>%
+  summarise(Freq = n()) %>% 
+  mutate(prop = Freq/sum(Freq)) %>% 
+  filter(Freq != 0) %>% 
+  
+  ggplot(mapping = aes(x = 2, y = prop, fill = `Marital Status`))+
+  geom_bar(width = 1, color = "white", stat = "identity") +
+  xlim(0.5, 2.5) +
+  coord_polar(theta = "y", start = 0) +
+  theme_void() +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 4, position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Reds", direction = 1) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+
+  labs(title = "Guest Marital Status",
+       x = "",
+       y = "",
+       fill = "Status") +
+  theme(legend.position = "bottom") 
+```
+
+
+## Guest analysis by age group
+
+```{r eval=TRUE}
+
+
+guest_only %>% 
+  filter(Age_Range != "NA") %>% 
+  group_by(Age_Range) %>%
+  summarise(Freq = n()) %>% 
+  mutate(prop = Freq/sum(Freq)) %>% 
+  filter(Freq != 0) %>% 
+  
+  ggplot(mapping = aes(x = 2, y = prop, fill = Age_Range))+
+  geom_bar(width = 1, color = "white", stat = "identity") +
+  xlim(0.5, 2.5) +
+  coord_polar(theta = "y", start = 0) +
+  theme_void() +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 3, position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Reds", direction = 1) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+
+  labs(title = "Guest by Age Group",
+       x = "",
+       y = "",
+       fill = "Age Group") +
+  theme(legend.position = "bottom") 
+```
+
+<!-- * We recorded a total guest ($1^{st}$ and $2^{nd}$ timers only) count of `r dim(guest_only)[1]`. with an average age of `r round(mean(guest_only$Age, na.rm = TRUE),0)` years. -->
+
+## How did our guest hear about us?
+
+
+```{r}
+
+
+guest_only %>% 
+  filter(`How did you hear of Harvesters?` != "NA") %>% 
+  group_by(`How did you hear of Harvesters?`) %>%
+  summarise(Freq = n()) %>% 
+  mutate(prop = Freq/sum(Freq)) %>% 
+  filter(Freq != 0) %>% 
+  
+  ggplot(mapping = aes(x = 2, y = prop, fill = `How did you hear of Harvesters?`))+
+  geom_bar(width = 1, color = "white", stat = "identity") +
+  xlim(0.5, 2.5) +
+  coord_polar(theta = "y", start = 0) +
+  theme_void() +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 3, position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Reds", direction = 1) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+
+  labs(title = "Platform",
+       x = "",
+       y = "",
+       fill = "Medium") +
+  theme(legend.position = "bottom") 
+
+
+```
+
+<!-- ## Guest by service attendance -->
+
+<!-- ```{r} -->
+<!-- guest_only %>%  -->
+<!--   #filter(`How did you hear of Harvesters?` != "NA") %>%  -->
+<!--   group_by(Service) %>% -->
+<!--   summarise(Freq = n()) %>%  -->
+<!--   mutate(prop = Freq/sum(Freq)) %>%  -->
+<!--   filter(Freq != 0) %>%  -->
+
+<!--   ggplot(mapping = aes(x = 2, y = prop, fill = Service))+ -->
+<!--   geom_bar(width = 1, color = "white", stat = "identity") + -->
+<!--   xlim(0.5, 2.5) + -->
+<!--   coord_polar(theta = "y", start = 0) + -->
+<!--   theme_void() + -->
+<!--   scale_y_continuous(labels = percent) + -->
+<!--   geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 4, position = position_stack(vjust = 0.5)) + -->
+<!--   scale_fill_brewer(palette = "Reds", direction = 1) + -->
+<!--   #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+ -->
+<!--   labs(title = "Service Time", -->
+<!--        x = "", -->
+<!--        y = "", -->
+<!--        fill = "Service") + -->
+<!--   theme(legend.position = "bottom")  -->
+<!-- ``` -->
+
+
+## Decisions made by guest
+
+```{r}
+guest_only %>% 
+  filter(`My decision today` != "NA") %>% 
+  group_by(`My decision today`) %>%
+  summarise(Freq = n()) %>% 
+  mutate(prop = Freq/sum(Freq)) %>% 
+  filter(Freq != 0) %>% 
+  
+  ggplot(mapping = aes(x = 2, y = prop, fill = `My decision today`))+
+  geom_bar(width = 1, color = "white", stat = "identity") +
+  xlim(0.5, 2.5) +
+  coord_polar(theta = "y", start = 0) +
+  theme_void() +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 3, position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Reds", direction = 1) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+
+  labs(title = "Guest Decision",
+       x = "",
+       y = "",
+       fill = "Decisions") +
+  theme(legend.position = "bottom") 
+```
+
+
+
+## Guest by Location
+
+```{r fig.width=12, fig.height=7}
+guest_only %>% 
+  filter(District != "NA") %>% 
+  group_by(District) %>%
+  summarise(Freq = n()) %>% 
+  mutate(prop = Freq/sum(Freq)) %>% 
+  filter(Freq != 0) %>% 
+  
+  ggplot(mapping = aes(x = reorder(District, prop), y = prop, fill = District))+
+  geom_bar(width = 0.7, stat = "identity", show.legend = FALSE) +
+  scale_y_continuous(labels = percent) +
+  geom_text(aes(label = paste0(round(prop*100, 1), "%")), size = 3, position = position_stack(vjust = 0.5)) +
+  scale_fill_brewer(palette = "Reds", direction = 1) +
+  #theme(axis.text.x = element_text(angle = 90), legend.position = "top")+
+  labs(title = "Guest by Location",
+       x = "District",
+       y = "",
+       fill = "") +
+  theme(legend.position = "bottom") +
+  coord_flip() +
+  theme_light()
+```
+
+
+## Appreciation
+
+\includegraphics[width=1.90\textwidth,keepaspectratio]{Images/thank_you.jpg}
+
+## Feedback
+
+* For feedback, kindly reach the Head of Guest Data Unit via (**a.dayoajimuda@gmail.com**)

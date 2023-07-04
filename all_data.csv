@@ -1,0 +1,11 @@
+created_at,PM1.0_CF1_ug.m3,PM2.5_CF1_ug.m3,PM10.0_CF1_ug.m3,UptimeMinutes,RSSI_dbm,Temperature_F,Humidity_.,PM2.5_ATM_ug.m3,File,X
+2019-04-16 00:00:00 UTC,0.16,0.22,0.28,421.96,-70.69,51.8,34.56,0.22,East Pearrygin (outside) (48.47289 -120.13231) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-17 00:00:00 UTC,0.15,0.18,0.27,732.97,-71.73,57.44,33.61,0.18,East Pearrygin (outside) (48.47289 -120.13231) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-16 00:00:00 UTC,0.16,0.25,0.31,184.63,-89.27,54.7,32.29,0.25,Lazy Cat Ranch (outside) (48.524842 -120.187655) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-17 00:00:00 UTC,0.37,0.34,0.33,288.73,-91.39,60.9,31.17,0.34,Lazy Cat Ranch (outside) (48.524842 -120.187655) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-16 00:00:00 UTC,NA,NA,NA,NA,NA,NA,NA,NA,Library2 (outside) (48.477208 -120.19119) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-17 00:00:00 UTC,NA,NA,NA,NA,NA,NA,NA,NA,Library2 (outside) (48.477208 -120.19119) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-16 00:00:00 UTC,NA,NA,NA,NA,NA,NA,NA,NA,Library3 (outside) (48.476497 -120.190847) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-17 00:00:00 UTC,NA,NA,NA,NA,NA,NA,NA,NA,Library3 (outside) (48.476497 -120.190847) Primary 1440_minute_average 04_16_2019 04_17_2019.csv,NA
+2019-04-16 00:00:00 UTC,NA,NA,NA,NA,NA,NA,NA,NA,Library4 (outside) (48.477009 -120.189559) Primary 1440_minute_average04_16_2019 04_17_2019.csv,NA
+2019-04-17 00:00:00 UTC,NA,NA,NA,NA,NA,NA,NA,NA,Library4 (outside) (48.477009 -120.189559) Primary 1440_minute_average04_16_2019 04_17_2019.csv,NA
