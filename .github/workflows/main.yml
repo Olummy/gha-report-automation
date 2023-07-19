@@ -1,4 +1,4 @@
-name: Update-data
+name: Guest-Data
 on:
   schedule:
     - cron: "30 16 * * 0" # Every Sunday at 4:30 PM
@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2 # Checkout branch into the runner
-      - uses: r-lib/actions/setup-r@master # Set up R runtime
+      - uses: r-lib/actions/setup-r@main # Set up R runtime
         with:
           r-version: 'release'
           
