@@ -1,7 +1,7 @@
 name: Guest-Data
 on:
   schedule:
-    - cron: "30 16 * * 0" # Every Sunday at 4:30 PM
+    - cron: "30 15 * * 0" # Every Sunday at 4:30 PM
 
 jobs:
   generate-data:
